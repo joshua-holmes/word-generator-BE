@@ -7,4 +7,10 @@ class ApplicationController < Sinatra::Base
       new_message: "Thanks" }.to_json
   end
 
+  get "/stats" do
+    pp Dir.entries("./python")
+    file = File.read("./python/wordStats.json")
+    file
+  end
+
 end
