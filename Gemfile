@@ -38,6 +38,9 @@ gem "require_all", "~> 3.0"
 # json gem for manipulating json files in Ruby
 gem "json"
 
+# For password encryption
+gem "bcrypt"
+
 # These gems will only be used when we are running the application locally
 group :development do
   gem "pry", "~> 0.14.1"
