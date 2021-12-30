@@ -1,4 +1,3 @@
-require "pry"
 class Dictionary < ActiveRecord::Base
     belongs_to :user
 
@@ -52,7 +51,7 @@ class Dictionary < ActiveRecord::Base
         complete_combos_data.sort_by { |c| c[:id] }
     end
 
-    def get_letter(segment)
+    def get_letter(segment, is_auto = false)
         # Initialization
         returned_letter = ""
         new_segment = segment.dup
@@ -63,9 +62,9 @@ class Dictionary < ActiveRecord::Base
         loop do
             stats = self.generate_stats new_segment
             break if stats.length > 0
+            return nil if is_auto # Signifies to get_word method that this is the end of the word
             new_segment.slice!(0)
         end
-        puts "'#{new_segment}' was used as segment"
         # Find letter based on stats
         stats.find do |s|
             breakpoint += s[:ratio]
@@ -73,13 +72,18 @@ class Dictionary < ActiveRecord::Base
         end[:id].last
     end
 
-    def get_word(length)
+    def get_word(length)        # puts "'#{new_segment}' was used as segment"
+        # If length is 0, the length of the word will be set to automatic
+        is_auto = length == 0
+        length = 100 if is_auto
         returned_word = ""
         length.times do |i|
             if i == 0
                 returned_word += self.get_letter nil
             else
-                returned_word += self.get_letter returned_word
+                letter = self.get_letter returned_word, is_auto
+                return returned_word if is_auto && !letter # End of word
+                returned_word += letter
             end
         end
         returned_word
