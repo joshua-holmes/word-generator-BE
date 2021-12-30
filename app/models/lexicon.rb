@@ -1,4 +1,4 @@
-class Dictionary < ActiveRecord::Base
+class Lexicon < ActiveRecord::Base
     belongs_to :user
 
     def parse_words
@@ -72,7 +72,7 @@ class Dictionary < ActiveRecord::Base
         end[:id].last
     end
 
-    def get_word(length)        # puts "'#{new_segment}' was used as segment"
+    def get_word(length = rand(6) + 3)        # puts "'#{new_segment}' was used as segment"
         # If length is 0, the length of the word will be set to automatic
         is_auto = length == 0
         length = 100 if is_auto
