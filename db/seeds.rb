@@ -3,14 +3,24 @@ parsed_words = JSON.parse File.read("./python/words.json")
 
 puts "🌱 Destroying seeds..."
 
-User.destroy_all
+Word.destroy_all
 Lexicon.destroy_all
+LexiconWord.destroy_all
+
 
 
 puts "Creating new seeds..."
-
-example_user = User.create(username: "example", password: "1234abcd", password_confirmation: "1234abcd")
-
-Lexicon.create(name: "example words", words: parsed_words.join(","), user_id: example_user.id)
+def create_lexicon name, words
+    lex = Lexicon.create(name: name)
+    words.each do |word|
+        if Word.find_by(word: word)
+            saved_word = Word.find_by(word: word)
+        else
+            saved_word = Word.create(word: word)
+        end
+        LexiconWord.create(lexicon_id: lex.id, word_id: saved_word.id)
+    end
+end
+create_lexicon "example", parsed_words
 
 puts "✅ Done seeding!"

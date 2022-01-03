@@ -1,9 +1,6 @@
 class Lexicon < ActiveRecord::Base
-    belongs_to :user
-
-    def parse_words
-        self.words.split(",")
-    end
+    has_many :lexicon_words
+    has_many :words, through: :lexicon_words
 
     def generate_stats(segment)
         def add_combo_to_array(str, arr)
@@ -16,7 +13,7 @@ class Lexicon < ActiveRecord::Base
         end
         def count_combos_matching(segment)
             returned_arr = []
-            words = self.parse_words
+            words = self.words.map {|w_instance| w_instance.word}
             words.each do |word|
                 case segment
                 when String
