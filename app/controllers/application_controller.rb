@@ -27,4 +27,18 @@ class ApplicationController < Sinatra::Base
     [word].to_json
   end
 
+  post "/create_lexicon" do
+    name, words = params[:name], params[:words]
+    lex = Lexicon.create(name: name)
+    words.each do |word|
+      if Word.find_by(word: word)
+        saved_word = Word.find_by(word: word)
+      else
+        saved_word = Word.create(word: word)
+      end
+      LexiconWord.create(lexicon_id: lex.id, word_id: saved_word.id)
+    end
+    {name: name, words: words}.to_json
+  end
+
 end
