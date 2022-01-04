@@ -46,4 +46,8 @@ class ApplicationController < Sinatra::Base
     Lexicon.find_by(name: name).to_json
   end
 
+  get "/lexicon/all" do
+    Lexicon.all.to_json
+  end
+
 end
