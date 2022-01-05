@@ -2,6 +2,9 @@ class Lexicon < ActiveRecord::Base
     has_many :lexicon_words
     has_many :words, through: :lexicon_words
 
+    has_many :favorite_words
+    has_many :fake_words, through: :favorite_words
+
     def generate_stats(segment)
         def add_combo_to_array(str, arr)
             if arr.find { |c| c[:id] == str }
