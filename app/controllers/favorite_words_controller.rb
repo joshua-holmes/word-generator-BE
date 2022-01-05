@@ -1,3 +1,0 @@
-class FakeWordsController < ApplicationController
-    
-end
