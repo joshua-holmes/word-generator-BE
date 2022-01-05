@@ -5,7 +5,7 @@ class LexiconsController < ApplicationController
 
     get "/lexicons/:lexicon_id" do
         lexicon = Lexicon.find(params[:lexicon_id])
-        lexicon.to_json(include: :fake_words)
+        lexicon.to_json(include: :favorite_words)
     end
 
     post '/lexicons' do
@@ -19,39 +19,28 @@ class LexiconsController < ApplicationController
         end
         lex = Lexicon.create(name: name)
         words.each do |word|
-            saved_word = Word.find_by(word: word) || Word.create(word: word)
+            saved_word = Word.find_by(word: word.downcase) || Word.create(word: word.downcase)
             LexiconWord.create(lexicon_id: lex.id, word_id: saved_word.id)
         end
         lex.to_json
     end
 
     post "/lexicons/:lexicon_id" do
-        lexicon, word = Lexicon.find(params[:lexicon_id]), params[:word]
-        if !lexicon
-            return { message: "lexicon id in POST path was invalid" }.to_json
-        elsif !word
-            return { message: "A 'word' param must be included in body" }.to_json
-        elsif lexicon.fake_words.find_by(word: word)
+        lexicon, word = Lexicon.find(params[:lexicon_id]), params[:fave_word].downcase
+        if !word
+            return { message: "A 'fave_word' param must be included in body" }.to_json
+        elsif lexicon.favorite_words.find_by(word: word)
             return { message: "'#{word}' is already a favorite in lexicon '#{lexicon.name}'" }.to_json
         end
-        fake_word = FakeWord.find_by(word: word) || FakeWord.create(word: word)
-        FavoriteWord.create(lexicon_id: lexicon.id, fake_word_id: fake_word.id)
-        fake_word.to_json
+        fave_word = FavoriteWord.create(lexicon_id: lexicon.id, word: word)
+        fave_word.to_json
     end
 
-    delete "/lexicons/:lexicon_id/:fake_word_id" do
+    delete "/lexicons/:lexicon_id/:favorite_word_id" do
         lexicon = Lexicon.find(params[:lexicon_id])
-        fake_word = FakeWord.find(params[:fake_word_id])
-        if !(lexicon && fake_word)
-            return { message: "One or both id params in DELETE path are not related to a record" }.to_json
-        end
-        favorite_word = lexicon.favorite_words.find_by(fake_word_id: fake_word.id)
-        if !favorite_word
-            return { message: "Word referenced is not related to lexicon referenced" }.to_json
-        end
+        favorite_word = lexicon.favorite_words.find(params[:favorite_word_id])
         favorite_word.destroy
-        fake_word.destroy if fake_word.lexicons.count == 0
-        fake_word.to_json
+        favorite_word.to_json
     end
     
 end

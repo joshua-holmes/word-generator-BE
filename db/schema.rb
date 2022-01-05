@@ -10,18 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_05_011157) do
+ActiveRecord::Schema.define(version: 2022_01_05_150300) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "fake_words", force: :cascade do |t|
-    t.string "word"
-  end
-
   create_table "favorite_words", force: :cascade do |t|
-    t.integer "fake_word_id"
     t.integer "lexicon_id"
+    t.string "word"
   end
 
   create_table "lexicon_words", force: :cascade do |t|

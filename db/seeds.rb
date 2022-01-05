@@ -6,7 +6,6 @@ puts "🌱 Destroying seeds..."
 Word.destroy_all
 Lexicon.destroy_all
 LexiconWord.destroy_all
-FakeWord.destroy_all
 FavoriteWord.destroy_all
 
 
@@ -25,8 +24,7 @@ def create_lexicon name, words
 end
 def favorite_word fake_word, lexiconName
     lexicon = Lexicon.find_by(name: lexiconName)
-    word = FakeWord.find_by(word: fake_word) || FakeWord.create(word: fake_word)
-    FavoriteWord.create(fake_word_id: word.id, lexicon_id: lexicon.id)
+    FavoriteWord.create(word: fake_word, lexicon_id: lexicon.id)
 end
 
 create_lexicon "example", parsed_words
