@@ -26,9 +26,9 @@ class LexiconsController < ApplicationController
     end
 
     post "/lexicons/:lexicon_id" do
-        lexicon, word = Lexicon.find(params[:lexicon_id]), params[:fave_word].downcase
+        lexicon, word = Lexicon.find(params[:lexicon_id]), params[:word].downcase
         if !word
-            return { message: "A 'fave_word' param must be included in body" }.to_json
+            return { message: "A 'word' param must be included in body" }.to_json
         elsif lexicon.favorite_words.find_by(word: word)
             return { message: "'#{word}' is already a favorite in lexicon '#{lexicon.name}'" }.to_json
         end
