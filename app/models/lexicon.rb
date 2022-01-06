@@ -5,14 +5,6 @@ class Lexicon < ActiveRecord::Base
     has_many :favorite_words
 
     def generate_stats(segment)
-        def add_combo_to_array(str, arr)
-            if arr.find { |c| c[:id] == str }
-                index = arr.index arr.find { |c| c[:id] == str }
-                arr[index][:total] += 1
-            else
-                arr << { id: str, total: 1 }
-            end
-        end
         def count_combos_matching(segment)
             returned_arr = []
             words = self.words.map {|w_instance| w_instance.word}
@@ -23,7 +15,7 @@ class Lexicon < ActiveRecord::Base
                     num_of_combos.times do |i|
                         combo = word.slice(i, segment.length + 1)
                         segment_in_combo = combo.slice(0, combo.length - 1) == segment
-                        add_combo_to_array(combo, returned_arr) if segment_in_combo
+                        add_combo_to_array combo, returned_arr if segment_in_combo
                     end
                 when Integer
                     num_of_combos = word.length - segment + 1
@@ -34,7 +26,7 @@ class Lexicon < ActiveRecord::Base
                 else # Finds starting letter stats
                     1.times do
                         combo = word.first
-                        add_combo_to_array(combo, returned_arr)
+                        add_combo_to_array combo, returned_arr
                     end
                 end
             end
@@ -50,6 +42,15 @@ class Lexicon < ActiveRecord::Base
         complete_combos_data.sort_by { |c| c[:id] }
     end
 
+    def add_combo_to_array(str, arr)
+        if arr.find { |c| c[:id] == str }
+            index = arr.index arr.find { |c| c[:id] == str }
+            arr[index][:total] += 1
+        else
+            arr << { id: str, total: 1 }
+        end
+    end
+
     def get_letter(segment, is_auto = false)
         # Initialization
         returned_letter = ""
@@ -59,7 +60,7 @@ class Lexicon < ActiveRecord::Base
         rand_num = rand
         # Looping until valid stats are gathered
         loop do
-            stats = self.generate_stats new_segment
+            stats = generate_stats new_segment
             break if stats.length > 0
             return nil if is_auto # Signifies to get_word method that this is the end of the word
             new_segment.slice!(0)
@@ -71,20 +72,26 @@ class Lexicon < ActiveRecord::Base
         end[:id].last
     end
 
-    def get_word(length = rand(6) + 3)        # puts "'#{new_segment}' was used as segment"
+    def get_word(length = rand(6) + 3)
         # If length is 0, the length of the word will be set to automatic
         is_auto = length == 0
-        length = 100 if is_auto
+        if is_auto
+            numberOf = 100
+        else
+            numberOf = length
+        end
         returned_word = ""
-        length.times do |i|
+        end_of_word = false
+        numberOf.times do |i|
             if i == 0
-                returned_word += self.get_letter nil
-            else
-                letter = self.get_letter returned_word, is_auto
-                return returned_word if is_auto && !letter # End of word
-                returned_word += letter
+                returned_word += get_letter nil
+            elsif !end_of_word
+                letter = get_letter returned_word, is_auto
+                end_of_word = is_auto && !letter # End of word
+                returned_word += letter unless end_of_word
             end
         end
-        returned_word
+        return returned_word unless words.find_by word: returned_word
+        get_word length
     end
 end
