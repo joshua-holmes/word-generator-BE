@@ -81,14 +81,22 @@ class Lexicon < ActiveRecord::Base
             numberOf = length
         end
         returned_word = ""
+        segment = ""
         end_of_word = false
         numberOf.times do |i|
             if i == 0
                 returned_word += get_letter nil
+                segment = returned_word
             elsif !end_of_word
-                letter = get_letter returned_word, is_auto
+                # segment var and this loop are both to help the algo run faster
+                # by not checking for stats for the same segments every iteration
+                while generate_stats(segment).length == 0
+                    segment.slice!(0)
+                end unless is_auto
+                letter = get_letter segment, is_auto
                 end_of_word = is_auto && !letter # End of word
                 returned_word += letter unless end_of_word
+                segment += letter unless end_of_word
             end
         end
         return returned_word unless words.find_by word: returned_word
